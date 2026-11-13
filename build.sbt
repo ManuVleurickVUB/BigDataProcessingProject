@@ -1,8 +1,8 @@
 
 /***** DEFINE THESE PARAMS *****/
 val projectName = "project"
-val mainClassName = "project.Skeleton"
-val outputJarName = "myProject.jar"
+val mainClassName = "project.Main"
+val outputJarName = "project.jar"
 /*******************************/
 
 val scalaVer = "2.13.16"
@@ -25,6 +25,9 @@ lazy val root = (project in file(".")).
 
 assembly / mainClass := Some(mainClassName)
 assembly / assemblyJarName := outputJarName
+// write the fat jar to the repository root instead of target/scala-2.13/
+assembly / assemblyOutputPath := baseDirectory.value / outputJarName
+cleanFiles += baseDirectory.value / outputJarName
 Compile / run / mainClass := Some(mainClassName)
 
 // make run command include the provided dependencies

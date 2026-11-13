@@ -13,3 +13,8 @@ text/bdp.pdf
 **/checkpointDir/
 
 *.jsonl
+
+assignment.pdf
+
+# assembled fat jar
+/project.jar
