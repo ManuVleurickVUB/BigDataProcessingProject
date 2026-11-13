@@ -3,6 +3,8 @@ package project
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 
+import org.apache.spark.sql.functions._
+
 // sbt assembly
 // spark-submit --master "local[*]" ./project.jar data/otto-tiny.jsonl
 
@@ -29,9 +31,25 @@ object Main {
 
     println(s"Starting Spark job on ${sc.master}:")
 
-    val data = spark.read.json(args(0))
-    data.printSchema() // events(array of element(struct of aid(long),ts(long),type(string))) and session(long)
-    println("Dataset loaded")
+    // 3.2
+    val dataDF = spark.read.json(args(0))
+    dataDF.printSchema() // events(array of element(struct of aid(long),ts(long),type(string))) and session(long)
+    println(s"Dataset ${args(0)} loaded")
+
+    // Intermediate representation: Spark DataFrame since easy to use while getting Spark SQL optimizations
+
+    // 3.3
+    val events = dataDF.withColumn("event", explode(col("events")))
+    events.select(col("event.type")).distinct().show(false) // clicks, orders, carts
+
+    events.groupByKey(col("aid")).max()
+
+    val amountOfClicks = events.filter(col("event.type") === "clicks").count()
+    val amountOfOrders = events.filter(col("event.type") === "orders").count()
+    val amountOfCarts = events.filter(col("event.type") === "carts").count()
+    println(s"Amount of clicks: ${amountOfClicks}")
+    println(s"Amount of orders: ${amountOfOrders}")
+    println(s"Amount of carts: ${amountOfCarts}")
 
 
     
